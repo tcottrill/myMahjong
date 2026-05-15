@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background: dark felt green with vignette -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1a5d2b"/>
+      <stop offset="100%" stop-color="#0a2615"/>
+    </radialGradient>
+    <linearGradient id="tileFace" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fffaeb"/>
+      <stop offset="100%" stop-color="#e8d9b2"/>
+    </linearGradient>
+    <linearGradient id="tileSide" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#cdb88a"/>
+      <stop offset="100%" stop-color="#8a7649"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="0" y="0" width="512" height="512" rx="96" ry="96" fill="url(#bg)"/>
+
+  <!-- Three stacked tiles in classic mahjong arrangement -->
+  <!-- Back tile (slightly behind, blue) -->
+  <g transform="translate(80,90) rotate(-6 130 170)">
+    <!-- side -->
+    <path d="M 8 18 L 8 360 Q 8 372 20 372 L 240 372 Q 252 372 252 360 L 252 60 L 232 40 L 16 40 Z"
+          fill="url(#tileSide)"/>
+    <!-- face -->
+    <rect x="8" y="8" width="244" height="332" rx="24" fill="url(#tileFace)" stroke="#7a6a44" stroke-width="3"/>
+    <!-- bamboo glyph -->
+    <g transform="translate(130 170)" fill="#1b5e20">
+      <!-- 4 bamboo sticks for 'Sou 4' -->
+      <g>
+        <rect x="-72" y="-86" width="22" height="180" rx="11"/>
+        <rect x="-24" y="-86" width="22" height="180" rx="11"/>
+        <rect x="24" y="-86" width="22" height="180" rx="11"/>
+        <rect x="-72" y="-86" width="22" height="180" rx="11" transform="translate(96 0)"/>
+        <!-- segment rings -->
+        <g fill="#2e7d32">
+          <ellipse cx="-61" cy="-40" rx="11" ry="4"/>
+          <ellipse cx="-61" cy="10" rx="11" ry="4"/>
+          <ellipse cx="-61" cy="60" rx="11" ry="4"/>
+          <ellipse cx="-13" cy="-40" rx="11" ry="4"/>
+          <ellipse cx="-13" cy="10" rx="11" ry="4"/>
+          <ellipse cx="-13" cy="60" rx="11" ry="4"/>
+          <ellipse cx="35" cy="-40" rx="11" ry="4"/>
+          <ellipse cx="35" cy="10" rx="11" ry="4"/>
+          <ellipse cx="35" cy="60" rx="11" ry="4"/>
+          <ellipse cx="83" cy="-40" rx="11" ry="4"/>
+          <ellipse cx="83" cy="10" rx="11" ry="4"/>
+          <ellipse cx="83" cy="60" rx="11" ry="4"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Front tile (foreground, red dragon character) -->
+  <g transform="translate(196,150) rotate(8 130 170)">
+    <path d="M 8 18 L 8 360 Q 8 372 20 372 L 240 372 Q 252 372 252 360 L 252 60 L 232 40 L 16 40 Z"
+          fill="url(#tileSide)"/>
+    <rect x="8" y="8" width="244" height="332" rx="24" fill="url(#tileFace)" stroke="#7a6a44" stroke-width="3"/>
+    <!-- Red dragon: 中 character -->
+    <text x="130" y="230" text-anchor="middle" font-family="serif" font-size="220" font-weight="bold" fill="#b71c1c">中</text>
+  </g>
+
+  <!-- Highlight gloss on top-right -->
+  <path d="M 384 64 Q 448 64 448 128 L 448 192 Q 384 96 320 96 Q 320 64 384 64 Z"
+        fill="rgba(255,255,255,0.08)"/>
+</svg>
