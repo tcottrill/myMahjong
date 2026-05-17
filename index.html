@@ -3198,14 +3198,15 @@ function draw() {
 
 function getDeadlockRects() {
     const w = Math.min(width - 40, 320);
-    const h = 220;
+    const h = 270;
     const x = (width - w) / 2;
     const y = (height - h) / 2;
-    const btnW = w - 40, btnH = 44;
+    const btnW = w - 40, btnH = 44, gap = 10;
     return {
         dialog: { x, y, w, h },
-        shuffle: { x: x + 20, y: y + 100, w: btnW, h: btnH },
-        menu:    { x: x + 20, y: y + 156, w: btnW, h: btnH },
+        undo:    { x: x + 20, y: y + 100,                w: btnW, h: btnH },
+        shuffle: { x: x + 20, y: y + 100 + (btnH + gap), w: btnW, h: btnH },
+        menu:    { x: x + 20, y: y + 100 + 2*(btnH+gap), w: btnW, h: btnH },
     };
 }
 
@@ -3230,8 +3231,12 @@ function drawDeadlock() {
     ctx.fillText("No moves available", D.dialog.x + D.dialog.w/2, D.dialog.y + 45);
     ctx.font = '14px Arial';
     ctx.fillStyle = '#cdb88a';
-    ctx.fillText("All remaining pairs are blocked.", D.dialog.x + D.dialog.w/2, D.dialog.y + 72);
+    ctx.fillText("Undo a move, shuffle, or quit.", D.dialog.x + D.dialog.w/2, D.dialog.y + 72);
 
+    // UNDO at the top — most useful escape from end-game stack deadlocks.
+    // Dimmed if the undo stack is empty.
+    const undoColor = undoStack.length > 0 ? '#6a1b9a' : '#3a2050';
+    drawButton(D.undo.x,    D.undo.y,    D.undo.w,    D.undo.h,    "UNDO",         undoColor, 18);
     drawButton(D.shuffle.x, D.shuffle.y, D.shuffle.w, D.shuffle.h, "SHUFFLE",      '#4CAF50', 18);
     drawButton(D.menu.x,    D.menu.y,    D.menu.w,    D.menu.h,    "BACK TO MENU", '#d32f2f', 16);
 }
@@ -3704,6 +3709,17 @@ function handleInput(x, y) {
 
     if (state === 'DEADLOCK') {
         const D = getDeadlockRects();
+        if (pointInButton(x, y, D.undo.x, D.undo.y, D.undo.w, D.undo.h)) {
+            if (undoStack.length > 0) {
+                undoLast();   // sets state back to PLAY and redraws
+                // If undo somehow leaves the board still deadlocked, re-trigger the dialog.
+                if (checkDeadlock()) {
+                    state = 'DEADLOCK';
+                    setTimeout(() => { playDeadlock(); draw(); }, 200);
+                }
+            }
+            return;
+        }
         if (pointInButton(x, y, D.shuffle.x, D.shuffle.y, D.shuffle.w, D.shuffle.h)) {
             state = 'PLAY';
             shuffleBoard();
