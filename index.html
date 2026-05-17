@@ -3614,11 +3614,28 @@ function drawTileBody(t, px, py, tileW, tileH) {
     // Glyph (suit-specific SVG)
     const name = spriteName(t.suit, t.val);
     const img = TILE_IMAGES[name];
-    if (img && img.complete) {
+    if (img && img.complete && img.naturalWidth > 0) {
         // Inset the glyph slightly so it sits within the tile face border
         const padX = tileW * 0.10;
         const padY = tileH * 0.08;
         ctx.drawImage(img, px + padX, py + padY, tileW - 2*padX, tileH - 2*padY);
+    } else {
+        // Diagnostic fallback: if the glyph image is missing or didn't decode,
+        // render the sprite name (or "?" if unknown) so the broken tile is identifiable.
+        // Also log it once per tile-face so the console shows what's failing.
+        if (!window.__missingGlyphsLogged) window.__missingGlyphsLogged = new Set();
+        const key = name || `${t.suit}/${t.val}`;
+        if (!window.__missingGlyphsLogged.has(key)) {
+            window.__missingGlyphsLogged.add(key);
+            console.warn('Missing tile glyph:', key, '| img:', img,
+                         '| complete:', img && img.complete,
+                         '| naturalWidth:', img && img.naturalWidth);
+        }
+        ctx.fillStyle = '#b71c1c';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `bold ${Math.max(10, tileH * 0.22)}px sans-serif`;
+        ctx.fillText(name || '?', px + tileW/2, py + tileH/2);
     }
 
     // Selection / free-state overlay
