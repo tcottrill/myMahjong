@@ -381,23 +381,35 @@ function layoutBounds(layout) {
 }
 ```
 
-UI safe-area constants (room for buttons):
+Version 1.1 uses device safe-area insets instead of fixed top/bottom padding.
+Read all four `env(safe-area-inset-*)` values through the computed padding of a
+hidden, fixed, non-interactive DOM element on every resize. Use zero as fallback.
+Keep the canvas full-screen and scrolling disabled. Share the board rectangle
+between scaling and centering:
 
 ```js
-const TOP_PAD = 95;      // room for QUIT button + HUD strip
-const BOTTOM_PAD = 95;   // room for HINT / SHUFFLE / UNDO row
+function getBoardRect() {
+    const buttons = getGameButtonRects();
+    const x = safeArea.left + 8;
+    const y = buttons.quit.y + buttons.quit.h + 8;
+    return {
+        x, y,
+        w: Math.max(1, width - x - safeArea.right - 8),
+        h: Math.max(1, buttons.hint.y - 12 - y),
+    };
+}
 ```
 
 Compute scale & offsets:
 
 ```js
 function resize() {
+    // Refresh safeArea from the hidden element's computed padding first.
     canvas.width  = width  = window.innerWidth;
     canvas.height = height = window.innerHeight;
     const bb = layoutBounds(activeLayout());
-    const usableW = width - 16;
-    const usableH = height - TOP_PAD - BOTTOM_PAD;
-    scale = Math.min(usableW / bb.width, usableH / bb.height);
+    const board = getBoardRect();
+    scale = Math.min(board.w / bb.width, board.h / bb.height);
     draw();
 }
 
@@ -405,9 +417,9 @@ function getLayoutOffsets() {
     const bb = layoutBounds(activeLayout());
     const visualW = bb.width  * scale;
     const visualH = bb.height * scale;
-    const usableH = height - TOP_PAD - BOTTOM_PAD;
-    const offsetX = (width  - visualW) / 2 - bb.left * scale;
-    const offsetY = TOP_PAD + (usableH - visualH) / 2 - bb.top  * scale;
+    const board = getBoardRect();
+    const offsetX = board.x + (board.w - visualW) / 2 - bb.left * scale;
+    const offsetY = board.y + (board.h - visualH) / 2 - bb.top * scale;
     return { offsetX, offsetY };
 }
 
@@ -455,8 +467,8 @@ function getMenuRects() {
 
 ### Top strip
 
-- **QUIT button** at `(20, 50, 90, 38)` in portrait (y=20 in landscape) — red `#d32f2f`, font size 16.
-- **HUD pill** immediately to the right of QUIT, same height, extending to `width - 20` with 12 px gap from QUIT. `rgba(0,0,0,0.45)` fill, `rgba(253,246,227,0.18)` 1 px border, rounded 8 px corners. Inside:
+- **QUIT button** at `(safeArea.left + 20, safeArea.top + 6, 90, 38)` — red `#d32f2f`, font size 16.
+- **HUD pill** immediately to the right of QUIT, same height, extending to `width - safeArea.right - 20` with 12 px gap from QUIT. `rgba(0,0,0,0.45)` fill, `rgba(253,246,227,0.18)` 1 px border, rounded 8 px corners. Inside:
   - Left-aligned `m:ss` time string at 16 px Arial 600.
   - Right-aligned `matches / totalPairs` counter (e.g. `18 / 72`).
 
@@ -464,7 +476,7 @@ HUD updates once per second via a `setInterval` that only redraws when `state ==
 
 ### Bottom button row
 
-Three buttons centered horizontally — `HINT | SHUFFLE | UNDO` — sized to `min(width - 16, 360)` total width with two 8 px gaps between them. 48 px tall, 18 px font. UNDO is dimmed (`#3a2050`) when `undoStack.length === 0` and fully purple (`#6a1b9a`) otherwise.
+Three buttons centered horizontally within the safe width — `HINT | SHUFFLE | UNDO` — sized to `min(width - safeArea.left - safeArea.right - 16, 360)` total width with two 8 px gaps between them. Their top is `height - safeArea.bottom - 8 - 48`. 48 px tall, 18 px font. UNDO is dimmed (`#3a2050`) when `undoStack.length === 0` and fully purple (`#6a1b9a`) otherwise.
 
 ### Tile interaction
 
